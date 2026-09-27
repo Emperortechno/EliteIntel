@@ -4,7 +4,6 @@ import elite.intel.ai.brain.actions.handlers.commands.CommandRegistry;
 import elite.intel.ai.brain.actions.handlers.commands.builtin.IgnoreNonsensicalInputCommand;
 import elite.intel.ai.brain.actions.handlers.commands.custom.CustomCommandDefinition;
 import elite.intel.ai.brain.actions.handlers.commands.custom.CustomCommandRegistry;
-import elite.intel.ai.brain.actions.handlers.queries.ConnectionCheckQuery;
 import elite.intel.ai.brain.actions.handlers.queries.GeneralConversationQuery;
 import elite.intel.ai.brain.actions.handlers.queries.QueryRegistry;
 import elite.intel.db.util.Database;
@@ -25,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * <p>
  * Composition is checked against a frozen SNAPSHOT of the built-in action id set (language pinned
  * to EN in {@link #bootstrap()} for determinism). Only the built-in ids are compared: the floating
- * additions (mode fallback, connection-check) and custom-command ids are excluded, since they vary
+ * additions (mode fallback) and custom-command ids are excluded, since they vary
  * by session mode and by the local custom_commands.json. Comparison is by id SET only - not phrases
  * (language-dependent) and not order (covered by {@link #carrierClusterOrderInvariant()}).
  */
@@ -45,7 +44,7 @@ class AiActionMapGeneratorTest {
 
     /**
      * Frozen snapshot of the built-in action ids the generator must produce on EN.
-     * Excludes floating additions (general_conversation / ignore_nonsensical_input / connection_check)
+     * Excludes floating additions (general_conversation / ignore_nonsensical_input)
      * and custom-command ids. Regenerate via the dump diagnostic if the built-in set legitimately
      * changes.
      * <p>
@@ -187,6 +186,7 @@ class AiActionMapGeneratorTest {
             "query_total_bounties",
             "query_trade_profile",
             "query_trade_route",
+            "query_vega_self_diagnostic",
             "recover_srv_vehicle_get_on_board_ship",
             "launch_deploy_nomad",
             "remove_mining_target",
@@ -271,8 +271,7 @@ class AiActionMapGeneratorTest {
         // Floating additions vary by session mode / are machine-only - excluded from the built-in snapshot.
         Set<String> floating = new HashSet<>(Arrays.asList(
                 GeneralConversationQuery.ID,
-                IgnoreNonsensicalInputCommand.ID,
-                ConnectionCheckQuery.ID));
+                IgnoreNonsensicalInputCommand.ID));
         // Custom-command ids come from the local custom_commands.json - excluded for portability.
         Set<String> custom =
                 CustomCommandRegistry.getInstance().getCustomCommands().stream()
