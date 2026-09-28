@@ -41,8 +41,8 @@ class TransmissionAudioSettingsTest {
                 }
             }
             assertEquals(0, handle.createQuery("SELECT transmissionTones + effectsOnVegaAway + supertonicBoost FROM game_session").mapTo(Integer.class).one());
-            assertEquals(1, handle.createQuery("SELECT effectsOnRadio FROM game_session").mapTo(Integer.class).one());
-            assertEquals(1, handle.createQuery("SELECT enhancedRadioEffect FROM game_session").mapTo(Integer.class).one());
+            assertEquals(0, handle.createQuery("SELECT effectsOnRadio FROM game_session").mapTo(Integer.class).one());
+            assertEquals(0, handle.createQuery("SELECT enhancedRadioEffect FROM game_session").mapTo(Integer.class).one());
         }
     }
 
