@@ -30,7 +30,7 @@ class TransmissionAudioSettingsTest {
     }
 
     @Test
-    void migrationKeepsExistingAudioBehaviourByDefault() throws Exception {
+    void migrationDefaultsToEnhancedRadioOnly() throws Exception {
         try (Handle handle = Jdbi.create("jdbc:sqlite::memory:").open()) {
             handle.execute("CREATE TABLE game_session (id INTEGER PRIMARY KEY)");
             handle.execute("INSERT INTO game_session (id) VALUES (1)");
@@ -40,8 +40,9 @@ class TransmissionAudioSettingsTest {
                     if (!sql.isBlank()) handle.execute(sql);
                 }
             }
-            assertEquals(0, handle.createQuery("SELECT transmissionTones + enhancedRadioEffect + effectsOnVegaAway + supertonicBoost FROM game_session").mapTo(Integer.class).one());
+            assertEquals(0, handle.createQuery("SELECT transmissionTones + effectsOnVegaAway + supertonicBoost FROM game_session").mapTo(Integer.class).one());
             assertEquals(1, handle.createQuery("SELECT effectsOnRadio FROM game_session").mapTo(Integer.class).one());
+            assertEquals(1, handle.createQuery("SELECT enhancedRadioEffect FROM game_session").mapTo(Integer.class).one());
         }
     }
 
