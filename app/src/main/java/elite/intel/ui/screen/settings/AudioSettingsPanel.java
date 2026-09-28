@@ -32,10 +32,10 @@ public class AudioSettingsPanel extends JPanel {
      * Dead while the radio is off (see {@link #updateRadioVolumeEnablement()}): a level for nothing is a puzzle.
      */
     private HudSlider radioVolumeSlider;
+    private HudSlider toneVolumeSlider;
     private HudSlider beepVolumeSlider;
     private HudSlider speechSpeedSlider;
     private HudSlider sttThreadsSlider;
-
     private HudComboBox<String> inputCombo;
     private HudComboBox<String> outputCombo;
     /** Guards the combo listeners from persisting while we programmatically re-sync the selection. */
@@ -115,6 +115,11 @@ public class AudioSettingsPanel extends JPanel {
         HudSection levels = buildLevelsSection();
         levels.setAlignmentX(Component.LEFT_ALIGNMENT);
         column.add(levels);
+
+        column.add(Box.createVerticalStrut(HUD_GAP));
+        HudSection transmission = buildTransmissionSection();
+        transmission.setAlignmentX(Component.LEFT_ALIGNMENT);
+        column.add(transmission);
 
         column.add(Box.createVerticalGlue());
         return column;
@@ -226,6 +231,64 @@ public class AudioSettingsPanel extends JPanel {
         addLevelRow(grid, ag, 4, getText("settings.audio.sttThreads"), sttThreadsSlider);
 
         return section;
+    }
+
+    private HudSection buildTransmissionSection() {
+        HudSection section = HudSection.flat(getText("settings.audio.section.transmission"), new GridBagLayout());
+        JPanel grid = section.body();
+        GridBagConstraints row = baseGbc();
+        row.gridx = 0;
+        row.anchor = GridBagConstraints.WEST;
+        row.fill = GridBagConstraints.HORIZONTAL;
+        row.weightx = 0;
+        row.insets = new Insets(3, 6, 3, 6);
+
+        JCheckBox tones = makeCheckBox(getText("settings.audio.transmission.tones"),
+                systemSession.isTransmissionTones());
+        row.gridy = 0;
+        grid.add(tones, row);
+        toneVolumeSlider = makeSlider(0, 100, systemSession.getTransmissionToneVolume());
+        toneVolumeSlider.setEnabled(tones.isSelected());
+        toneVolumeSlider.addChangeListener(e ->
+                systemSession.setTransmissionToneVolume(toneVolumeSlider.getValue()));
+        tones.addActionListener(e -> {
+            systemSession.setTransmissionTones(tones.isSelected());
+            toneVolumeSlider.setEnabled(tones.isSelected());
+        });
+        row.gridx = 1;
+        row.weightx = 1;
+        grid.add(toneVolumeSlider, row);
+
+        row.gridx = 0;
+        row.gridwidth = 2;
+        addAudioCheck(grid, row, 1, "settings.audio.transmission.degradation",
+                systemSession.isEnhancedRadioEffect(), systemSession::setEnhancedRadioEffect);
+        JCheckBox radioScope = addAudioCheck(grid, row, 2, "settings.audio.transmission.radio",
+                systemSession.isEffectsOnRadio(), systemSession::setEffectsOnRadio);
+        radioScope.setToolTipText(getText("settings.audio.transmission.radio.help"));
+        addAudioCheck(grid, row, 3, "settings.audio.transmission.vegaAway",
+                systemSession.isEffectsOnVegaAway(), systemSession::setEffectsOnVegaAway);
+        row.gridy = 4;
+        row.gridwidth = 1;
+        row.weightx = 0;
+        grid.add(hudReadoutLabel(getText("settings.audio.supertonicBoost")), row);
+        HudSlider supertonicBoostSlider = makeSlider(0, 100, systemSession.getSupertonicBoostPercent());
+        supertonicBoostSlider.addChangeListener(e ->
+                systemSession.setSupertonicBoostPercent(supertonicBoostSlider.getValue()));
+        row.gridx = 1;
+        row.weightx = 1;
+        grid.add(supertonicBoostSlider, row);
+
+        return section;
+    }
+
+    private static JCheckBox addAudioCheck(JPanel grid, GridBagConstraints row, int index, String label,
+                                      boolean selected, java.util.function.Consumer<Boolean> save) {
+        JCheckBox check = makeCheckBox(getText(label), selected);
+        check.addActionListener(e -> save.accept(check.isSelected()));
+        row.gridy = index;
+        grid.add(check, row);
+        return check;
     }
 
     /**
