@@ -346,10 +346,9 @@ tones, so a multi-sentence transmission has one pair and cancellation uses the e
 Supertonic 3 alone can apply 0–100% gain with a soft peak ceiling after the normal volume control.
 The tone slider scales the channel tones independently of the voice level; both settings persist per installation.
 
-The Audio Settings controls have two roles: **Radio beep at the start and end of each message** and **Enhanced voice
-processing** select the sound; **Apply selected effects to radio chat and NPC messages** and **Apply selected
-effects to VEGA on foot or in an SRV** select the recipients. The former `enhancedRadioEffect` database and
-session name remains for compatibility even though the enhanced processor also applies to eligible VEGA speech.
+The Audio Settings controls have two roles: **Radio beep at the start and end of each message** and **Radio
+effect** select the sound; **Apply selected effects to radio chat and NPC messages** and **Apply selected
+effects to VEGA on foot or in an SRV** select the recipients. The former `enhancedRadioEffect` database and session name (and the `settings.audio.transmission.degradation` bundle key) remains for compatibility even though the enhanced processor also applies to eligible VEGA speech.
 
 | Speech route | Its recipient switch | Enhanced processing | Result (tones are independent) |
 | --- | --- | --- | --- |
