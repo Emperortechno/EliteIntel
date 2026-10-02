@@ -390,6 +390,9 @@ public class BindingConflictRules {
                 // modal UI components: while a wheel is shown the game blocks every other control, so
                 // they cannot co-fire with any other action.
                 || action.contains("Wheel")
+                // The emote slots are picked from the emote wheel, so they belong to it: a slot's chord
+                // is read only while the wheel is up, never against Crouch, Sprint or Walk.
+                || action.startsWith("HumanoidEmote")
                 || action.startsWith("Vanity")
                 || action.startsWith("MovePlacement") || action.startsWith("Placement")
                 || action.startsWith("GalnetAudio")

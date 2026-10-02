@@ -89,8 +89,16 @@ public final class BindingConflictScanner {
      * <p>
      * The action name remains the unit of <em>judgement</em>: {@link BindingConflictRules} asks about
      * actions, and {@link Conflict} reports actions. The slot only decides what gets compared.
+     * <p>
+     * {@code hold} is the slot's {@code <Hold Value="1"/>}: Elite fires it on a long press instead of a tap, and
+     * shows it in its own controls screen as {@code [1](HOLD)}. A press and a hold on one key are two separate
+     * controls - Use Health Pack is a long press on the key whose tap selects the primary weapon.
      */
-    record SlotRef(String action, KeyBindingsParser.BindingSlotType slot) {
+    record SlotRef(String action, KeyBindingsParser.BindingSlotType slot, boolean hold) {
+
+        SlotRef(String action, KeyBindingsParser.BindingSlotType slot) {
+            this(action, slot, false);
+        }
     }
 
     /**
@@ -158,6 +166,9 @@ public final class BindingConflictScanner {
                     continue; // one action's own two slots - not a competitor
                 }
                 boolean sameChord = ksA.equals(ksB);
+                if (sameChord && refA.hold() != refB.hold()) {
+                    continue; // a tap and a long press on one key are two controls, not a clash
+                }
                 String shadowed = sameChord ? null : shadowedModifier(ksA, ksB);
                 if (!sameChord && shadowed == null) {
                     continue; // ED matches the exact chord; only identical chords or a shadowed modifier clash
@@ -277,10 +288,21 @@ public final class BindingConflictScanner {
      * to a clash the game will honour. The binding's own other slot is never a self-conflict.
      */
     public static CandidateConflict candidateConflictInSlots(
-            String bindingId, String key, Collection<String> modifiers,
+            String bindingId, BindingSlotType slotType, String key, Collection<String> modifiers,
             Map<String, KeyBindingsParser.BindingSlots> existingSlots) {
-        return candidateConflictInSlotKeysets(
-                bindingId, chordOf(key, modifiers), toSlotKeysets(existingSlots));
+        return candidateConflictInSlotKeysets(bindingId, chordOf(key, modifiers),
+                isHoldSlot(existingSlots.get(bindingId), slotType), toSlotKeysets(existingSlots));
+    }
+
+    /**
+     * Whether the slot being edited is a long press. A new key keeps the slot's {@code <Hold>} flag
+     * ({@code BindingsWriter} writes it back), so the candidate is judged as the press or hold it will be.
+     */
+    private static boolean isHoldSlot(KeyBindingsParser.BindingSlots slots, BindingSlotType slotType) {
+        if (slots == null || slotType == null) return false;
+        KeyBindingsParser.KeyBinding binding =
+                slotType == BindingSlotType.SECONDARY ? slots.secondary() : slots.primary();
+        return binding != null && binding.hold;
     }
 
     /**
@@ -296,6 +318,11 @@ public final class BindingConflictScanner {
      */
     static CandidateConflict candidateConflictInSlotKeysets(
             String bindingId, Set<String> candidate, Map<SlotRef, Set<String>> existing) {
+        return candidateConflictInSlotKeysets(bindingId, candidate, false, existing);
+    }
+
+    static CandidateConflict candidateConflictInSlotKeysets(
+            String bindingId, Set<String> candidate, boolean candidateHold, Map<SlotRef, Set<String>> existing) {
         if (candidate.isEmpty()) {
             return null; // a blank or unbound chord collides with nothing
         }
@@ -308,8 +335,12 @@ public final class BindingConflictScanner {
             if (other.equals(bindingId)) {
                 continue; // a binding never conflicts with its own other slot
             }
-            if (!candidate.equals(e.getValue()) && shadowedModifier(candidate, e.getValue()) == null) {
+            boolean sameChord = candidate.equals(e.getValue());
+            if (!sameChord && shadowedModifier(candidate, e.getValue()) == null) {
                 continue; // exact chord match, or a modifier one side binds on its own
+            }
+            if (sameChord && candidateHold != e.getKey().hold()) {
+                continue; // a tap and a long press on one key are two controls
             }
             if (BindingConflictRules.isSafeOverlap(bindingId, other)) {
                 continue;
@@ -381,7 +412,7 @@ public final class BindingConflictScanner {
                                    KeyBindingsParser.KeyBinding binding) {
         Set<String> keyset = keysetOf(binding);
         if (!keyset.isEmpty()) {
-            keysets.put(new SlotRef(action, slot), keyset);
+            keysets.put(new SlotRef(action, slot, binding.hold), keyset);
         }
     }
 

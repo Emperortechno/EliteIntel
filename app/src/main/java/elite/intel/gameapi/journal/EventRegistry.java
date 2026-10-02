@@ -37,6 +37,7 @@ public class EventRegistry {
         registerEvent("MarketBuy", MarketBuyEvent.class);
         registerEvent("MarketSell", MarketSellEvent.class);
         registerEvent("Disembark", DisembarkEvent.class);
+        registerEvent("Embark", EmbarkEvent.class);
         registerEvent("SellOrganicData", SellOrganicDataEvent.class);
         registerEvent("MultiSellExplorationData", MultiSellExplorationDataEvent.class);
         registerEvent("CodexEntry", CodexEntryEvent.class);
@@ -54,6 +55,7 @@ public class EventRegistry {
         registerEvent("DockingGranted", DockingGrantedEvent.class);
         registerEvent("DockSRV", DockSRVEvent.class);
         registerEvent("LaunchSRV", LaunchSRVEvent.class);
+        registerEvent("LaunchVessel", LaunchVesselEvent.class);
         registerEvent("FSSBodySignals", FSSBodySignalsEvent.class);
         registerEvent("ApproachSettlement", ApproachSettlementEvent.class);
         registerEvent("Missions", MissionsEvent.class);

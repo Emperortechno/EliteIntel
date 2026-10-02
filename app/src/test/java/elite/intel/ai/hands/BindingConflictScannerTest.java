@@ -411,6 +411,23 @@ class BindingConflictScannerTest {
     }
 
     @Test
+    void emoteSlotsBelongToTheEmoteWheel() {
+        // The commander's own layout: the slots sit on modified 0 and 1, and on the wheel's key. They are
+        // picked from the wheel, so neither the bare modifiers under them nor the wheel key is a clash.
+        List<Conflict> conflicts = BindingConflictScanner.scanKeysets(bindings(
+                "HumanoidCrouchButton", Set.of("Key_LeftControl"),
+                "HumanoidSprintButton", Set.of("Key_LeftShift"),
+                "HumanoidWalkButton", Set.of("Key_LeftAlt"),
+                "HumanoidEmoteWheelButton", Set.of("Key_B"),
+                "HumanoidEmoteSlot1", Set.of("Key_B"),
+                "HumanoidEmoteSlot2", Set.of("Key_LeftControl", "Key_0"),
+                "HumanoidEmoteSlot3", Set.of("Key_LeftShift", "Key_0"),
+                "HumanoidEmoteSlot4", Set.of("Key_LeftAlt", "Key_0")));
+
+        assertTrue(conflicts.isEmpty(), conflicts.toString());
+    }
+
+    @Test
     void theLampsShareOneKeyAcrossEveryContextWithoutComplaint() {
         // The layout commanders actually fly: one key for "the light", wherever they are. Elite names the
         // control three times because it is bound per vehicle, and only one of them can fire at a time.
@@ -645,6 +662,14 @@ class BindingConflictScannerTest {
             return this;
         }
 
+        /**
+         * A long-press slot: {@code <Hold Value="1"/>}, shown by Elite as {@code [1](HOLD)}.
+         */
+        Slots hold(String action, BindingSlotType slot, String... keys) {
+            m.put(new SlotRef(action, slot, true), Set.of(keys));
+            return this;
+        }
+
         Map<SlotRef, Set<String>> build() {
             return m;
         }
@@ -723,6 +748,64 @@ class BindingConflictScannerTest {
 
         assertNotNull(conflict);
         assertEquals("LandingGearToggle", conflict.otherBinding());
+    }
+
+    // --- press versus press-and-hold ---
+
+    @Test
+    void aPressAndALongPressOnOneKeyAreTwoControls() {
+        // The commander's on-foot layout, as Elite shows it: 1 selects the primary weapon, [1](HOLD) uses a
+        // health pack; 2 and [2](HOLD) the same for the secondary weapon and an energy cell. J and [J](HOLD)
+        // are the utility weapon and the suit tool.
+        Map<SlotRef, Set<String>> layout = slots()
+                .put("HumanoidSelectPrimaryWeaponButton", BindingSlotType.PRIMARY, "Key_1")
+                .hold("HumanoidHealthPack", BindingSlotType.PRIMARY, "Key_1")
+                .put("HumanoidSelectSecondaryWeaponButton", BindingSlotType.PRIMARY, "Key_2")
+                .hold("HumanoidBattery", BindingSlotType.PRIMARY, "Key_2")
+                .put("HumanoidSelectUtilityWeaponButton", BindingSlotType.PRIMARY, "Key_J")
+                .hold("HumanoidSwitchToSuitTool", BindingSlotType.PRIMARY, "Key_J")
+                .build();
+
+        List<Conflict> conflicts = BindingConflictScanner.scanSlotKeysets(layout);
+
+        assertTrue(conflicts.isEmpty(), conflicts.toString());
+    }
+
+    @Test
+    void twoLongPressesOnOneKeyStillClash() {
+        Map<SlotRef, Set<String>> layout = slots()
+                .hold("HumanoidHealthPack", BindingSlotType.PRIMARY, "Key_1")
+                .hold("HumanoidBattery", BindingSlotType.PRIMARY, "Key_1")
+                .build();
+
+        assertEquals(1, BindingConflictScanner.scanSlotKeysets(layout).size());
+    }
+
+    @Test
+    void twoPressesOnAHeldKeyStillClash() {
+        Map<SlotRef, Set<String>> layout = slots()
+                .put("HumanoidSelectPrimaryWeaponButton", BindingSlotType.PRIMARY, "Key_1")
+                .hold("HumanoidHealthPack", BindingSlotType.PRIMARY, "Key_1")
+                .put("HumanoidJumpButton", BindingSlotType.PRIMARY, "Key_1")
+                .build();
+
+        List<Conflict> conflicts = BindingConflictScanner.scanSlotKeysets(layout);
+
+        assertEquals(1, conflicts.size(), conflicts.toString());
+        assertEquals("HumanoidJumpButton", conflicts.getFirst().actionA());
+        assertEquals("HumanoidSelectPrimaryWeaponButton", conflicts.getFirst().actionB());
+    }
+
+    @Test
+    void aPressCandidateIsFreeOnAKeyOnlyHeldElsewhere() {
+        Map<SlotRef, Set<String>> existing = slots()
+                .hold("HumanoidHealthPack", BindingSlotType.PRIMARY, "Key_1").build();
+
+        assertNull(BindingConflictScanner.candidateConflictInSlotKeysets(
+                "HumanoidSelectPrimaryWeaponButton", Set.of("Key_1"), false, existing));
+        assertNotNull(BindingConflictScanner.candidateConflictInSlotKeysets(
+                        "HumanoidBattery", Set.of("Key_1"), true, existing),
+                "a long press is still taken by another long press");
     }
 
     @Test
