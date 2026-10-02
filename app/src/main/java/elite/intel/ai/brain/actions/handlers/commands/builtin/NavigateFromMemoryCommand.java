@@ -19,9 +19,7 @@ public final class NavigateFromMemoryCommand implements IntelCommand {
     @Override
     public String llmDescription() {
         return "Plot a route to the star system name the commander copied to the clipboard from a website such as "
-                + "INARA or Spansh (paste-from-memory navigation). Never for a system the commander names aloud: a "
-                + "spoken system name cannot be plotted. Then explain that routes come from a search result, a mission, "
-                + "the carrier, home or a trade stop, or from a system name copied from INARA followed by navigate from memory.";
+                + "INARA or Spansh (paste-from-memory navigation). Never for a system the commander names aloud.";
     }
 
 
