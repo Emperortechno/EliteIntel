@@ -107,6 +107,7 @@ public class EventRegistry {
         registerEvent("RedeemVoucher", RedeemVoucherEvent.class);
         registerEvent("Reputation", ReputationEvent.class);
         registerEvent("Scan", ScanEvent.class);
+        registerEvent("SendText", SendTextEvent.class);
         registerEvent("Scanned", ScannedEvent.class);
         registerEvent("ShipTargeted", ShipTargetedEvent.class);
         registerEvent("ShipyardBuy", ShipyardBuyEvent.class);
