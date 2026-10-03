@@ -1,5 +1,6 @@
 package elite.intel.bindforge.io;
 
+import elite.intel.io.TimestampedBackups;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -244,7 +245,7 @@ class PlayerBackupServiceTest {
 
     private PlayerBackupService service(Path playerBackupsDir, Clock clock, BindingsWorkingCopyRepository workingCopyRepo) {
         BindingsApplyService applyService =
-                new BindingsApplyService(workingCopyRepo, new BindingsBackupService(), tempDir.resolve("applybackups"));
+                new BindingsApplyService(workingCopyRepo, new TimestampedBackups(), tempDir.resolve("applybackups"));
         return new PlayerBackupService(new BindingsLoader(), workingCopyRepo, applyService, clock, playerBackupsDir);
     }
 
