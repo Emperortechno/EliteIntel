@@ -163,13 +163,22 @@ public final class CustomCommandStepEditorDialog extends JDialog {
     }
 
     /**
-     * A full-width note under the field column, aligned with the fields rather than the labels.
+     * A wrapped note under the field column, as wide as the fields and aligned with them.
      */
     private void addHintRow(JPanel panel, GridBagConstraints gbc, JComponent hint) {
         gbc.gridx = 1;
         gbc.weightx = 0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.WEST;
+        // WHY: a line-wrapping text area reports a height for whatever narrow width it last had, so pack()
+        // stretched the dialog to the full screen height. Lay it out once at the field width and pin the
+        // wrapped height it reports there, as HudConfirmDialog does for its message.
+        int width = HudPalette.HUD_PICKER_FIELD_WIDTH;
+        hint.setSize(width, Short.MAX_VALUE);
+        hint.doLayout();
+        Dimension hintSize = new Dimension(width, hint.getPreferredSize().height);
+        hint.setPreferredSize(hintSize);
+        hint.setMinimumSize(hintSize);
         panel.add(hint, gbc);
         gbc.gridy++;
         gbc.fill = GridBagConstraints.NONE;
