@@ -564,8 +564,9 @@ public class ParakeetSTTImpl implements EarsInterface {
      * "mm-hmm. fire lasers" → "fire lasers".
      * Returns empty string if the entire transcript is trash (Case 1 block).
      * Matching is punctuation-tolerant: "okay," and "okay." both match "okay".
+     * A lone "and" is what Parakeet makes of a key or controller click picked up hands-free.
      */
-    private @NonNull String stripTrashPrefix(String transcript) {
+    static @NonNull String stripTrashPrefix(String transcript) {
         String[] tokens = transcript.split("\\s+");
         int start = 0;
         outer:

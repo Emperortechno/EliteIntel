@@ -238,8 +238,8 @@ Per-frame AGC with separate attack (0.40) and release (0.98) smoothing coefficie
 
 ### Trash filtering (`stripTrashPrefix`)
 
-Parakeet occasionally prepends filler tokens (`mm-hmm`, `okay`, etc.) to real utterances.
-`stripTrashPrefix` strips any leading sequence matching `Reducer.trashSttWords`
+Parakeet occasionally prepends filler tokens (`mm-hmm`, `okay`, etc.) to real utterances, and hands-free it transcribes a key or controller click as a lone `and`.
+`stripTrashPrefix` strips any leading sequence matching `InputNormalizerLocalizations.trashPhrases()`
 (punctuation-tolerant), then removes trailing punctuation from the remainder. Transcripts that are entirely trash are silently discarded.
 
 ### Microphone gating (`MicrophoneGate`)
