@@ -31,6 +31,11 @@ public final class CustomCommandStepEditorDialog extends JDialog {
 
     private final JLabel valueLabel   = AppTheme.hudReadoutLabel("");
     private final HudTextField valueField = new HudTextField();
+    /**
+     * Shown for TYPE_TEXT only: the text goes wherever focus is, so an earlier step must open a text field.
+     */
+    private final HudBanner typeTextHint = HudBanner.multiline(
+            getText("actions.customCommands.editor.step.typeTextHint"), StatusBadge.State.INFO);
 
     private final JLabel bindingLabel = AppTheme.hudReadoutLabel(getText("actions.customCommands.editor.step.bindingId"));
     private final List<CustomCommandStepPickerItem> bindingItems = new ArrayList<>(CustomCommandStepPickerItem.bindingItems());
@@ -121,6 +126,7 @@ public final class CustomCommandStepEditorDialog extends JDialog {
 
         addRow(panel, gbc, getText("actions.customCommands.editor.step.type"), typeCombo);
         addRow(panel, gbc, valueLabel, valueField);
+        addHintRow(panel, gbc, typeTextHint);
         addRow(panel, gbc, bindingLabel, bindingCombo);
         addRow(panel, gbc, rawKeyLabel, rawKeyCombo);
         addRow(panel, gbc, rawModLabel, rawModCombo);
@@ -156,6 +162,20 @@ public final class CustomCommandStepEditorDialog extends JDialog {
         gbc.anchor = GridBagConstraints.CENTER;
     }
 
+    /**
+     * A full-width note under the field column, aligned with the fields rather than the labels.
+     */
+    private void addHintRow(JPanel panel, GridBagConstraints gbc, JComponent hint) {
+        gbc.gridx = 1;
+        gbc.weightx = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.WEST;
+        panel.add(hint, gbc);
+        gbc.gridy++;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER;
+    }
+
     private void updateFieldsForType() {
         CustomCommandStep.Type type = selectedType();
         boolean hasText    = type == CustomCommandStep.Type.SPEAK || type == CustomCommandStep.Type.TYPE_TEXT;
@@ -165,6 +185,7 @@ public final class CustomCommandStepEditorDialog extends JDialog {
 
         valueLabel.setVisible(hasText);
         valueField.setVisible(hasText);
+        typeTextHint.setVisible(type == CustomCommandStep.Type.TYPE_TEXT);
         bindingLabel.setVisible(hasBinding);
         bindingCombo.setVisible(hasBinding);
         rawKeyLabel.setVisible(isRawKey);

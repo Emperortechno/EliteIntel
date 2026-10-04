@@ -211,9 +211,10 @@ public class CustomCommandsTabPanel extends JPanel {
                         row.phrases(),
                         false,
                         row.sequenceText(),
-                        () -> editCustomCommand(row),
-                        () -> duplicateCustomCommand(row),
-                        () -> deleteCustomCommand(row)).showDialog());
+                        new CommandDetailsDialog.CustomCommandActions(
+                                () -> editCustomCommand(row),
+                                () -> duplicateCustomCommand(row),
+                                () -> deleteCustomCommand(row))).showDialog());
     }
 
     private void exportCustomCommands() {

@@ -107,15 +107,16 @@ public final class CustomCommandEditorDialog extends JDialog {
 
     /**
      * The form contents for a copy of {@code source}: its name with a copy suffix, its phrases and steps, and
-     * no id or action key. WHY no key: the original's key is taken, so the empty field prompts the commander
-     * to press Generate rather than meet a uniqueness error on Save.
+     * no id, action key or description. WHY no key: the original's key is taken, so the empty field prompts the
+     * commander to press Generate rather than meet a uniqueness error on Save. WHY no description: the editor
+     * cannot show or edit it, so a copied one would keep describing the original in the Actions catalog.
      */
     static CustomCommandDefinition duplicateDraft(CustomCommandDefinition source) {
         return new CustomCommandDefinition(
                 "",
                 "",
                 getText("actions.customCommands.editor.copyName", source.getName()),
-                source.getDescription(),
+                "",
                 source.getPhrases(),
                 source.getSteps());
     }

@@ -59,7 +59,8 @@ class CustomCommandEditorDialogTest {
 
     /**
      * A copy keeps what the commander wants to reuse - phrases and steps - but not the original's identity:
-     * no id, so it saves as a new command, and no action key, so Generate is the obvious next step.
+     * no id, so it saves as a new command, no action key, so Generate is the obvious next step, and no
+     * description, which the editor cannot show and would go on describing the original.
      */
     @Test
     void duplicateDraftKeepsPhrasesAndStepsButNotIdentity() {
@@ -67,13 +68,14 @@ class CustomCommandEditorDialogTest {
                 new CustomCommandStep(CustomCommandStep.Type.RAW_KEY, null, 0, null, "KEY_ENTER", null),
                 new CustomCommandStep(CustomCommandStep.Type.TYPE_TEXT, null, 0, "@VEGA "));
         CustomCommandDefinition source = new CustomCommandDefinition(
-                "3c8aa017-c37c-4058-8aa2-0f8515e419f4", "talk_at_vega", "Talk at Vega", "", "talk at vega", steps);
+                "3c8aa017-c37c-4058-8aa2-0f8515e419f4", "talk_at_vega", "Talk at Vega", "Opens comms and addresses VEGA", "talk at vega", steps);
 
         CustomCommandDefinition draft = CustomCommandEditorDialog.duplicateDraft(source);
 
         assertEquals("", draft.getId());
         assertEquals("", draft.getActionKey());
         assertEquals(getText("actions.customCommands.editor.copyName", "Talk at Vega"), draft.getName());
+        assertEquals("", draft.getDescription());
         assertEquals("talk at vega", draft.getPhrases());
         assertEquals(steps, draft.getSteps());
     }
