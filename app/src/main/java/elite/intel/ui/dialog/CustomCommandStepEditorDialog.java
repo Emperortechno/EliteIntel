@@ -73,7 +73,7 @@ public final class CustomCommandStepEditorDialog extends JDialog {
         typeCombo.setSelectedItem(step.getType());
         durationStepper.setValue(Math.max(0, step.getDurationMs()));   // HudStepper.setValue(int)
         switch (step.getType()) {
-            case SPEAK -> valueField.setText(step.getText());
+            case SPEAK, TYPE_TEXT -> valueField.setText(step.getText());
             case BINDING_TAP, BINDING_HOLD ->
                     selectPickerItem(bindingCombo, bindingItems, step.getBindingId(), getText("actions.customCommands.editor.step.unknownBinding"));
             case DELAY -> valueField.setText("");
@@ -158,7 +158,7 @@ public final class CustomCommandStepEditorDialog extends JDialog {
 
     private void updateFieldsForType() {
         CustomCommandStep.Type type = selectedType();
-        boolean hasText    = type == CustomCommandStep.Type.SPEAK;
+        boolean hasText    = type == CustomCommandStep.Type.SPEAK || type == CustomCommandStep.Type.TYPE_TEXT;
         boolean hasBinding = type == CustomCommandStep.Type.BINDING_TAP || type == CustomCommandStep.Type.BINDING_HOLD;
         boolean isRawKey   = type == CustomCommandStep.Type.RAW_KEY;
         boolean hasDuration = type == CustomCommandStep.Type.BINDING_HOLD || type == CustomCommandStep.Type.DELAY || isRawKey;
@@ -197,6 +197,9 @@ public final class CustomCommandStepEditorDialog extends JDialog {
         int duration = durationStepper.getValue();
         return switch (type) {
             case SPEAK -> new CustomCommandStep(type, null, 0, value);
+            // WHY: typed exactly as entered - a trailing space after "@VEGA" is what leaves the cursor ready
+            // for the commander's own words.
+            case TYPE_TEXT -> new CustomCommandStep(type, null, 0, valueField.getText());
             case BINDING_TAP -> new CustomCommandStep(type, selectedPickerId(bindingCombo), 0, null);
             case BINDING_HOLD -> new CustomCommandStep(type, selectedPickerId(bindingCombo), duration, null);
             case DELAY -> new CustomCommandStep(type, null, duration, null);
@@ -250,6 +253,7 @@ public final class CustomCommandStepEditorDialog extends JDialog {
             case DELAY        -> getText("actions.customCommands.editor.step.type.delay");
             case SPEAK        -> getText("actions.customCommands.editor.step.type.speak");
             case RAW_KEY      -> getText("actions.customCommands.editor.step.type.rawKey");
+            case TYPE_TEXT    -> getText("actions.customCommands.editor.step.type.typeText");
         };
     }
 

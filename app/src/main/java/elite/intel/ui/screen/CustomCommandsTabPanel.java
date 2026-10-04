@@ -212,6 +212,7 @@ public class CustomCommandsTabPanel extends JPanel {
                         false,
                         row.sequenceText(),
                         () -> editCustomCommand(row),
+                        () -> duplicateCustomCommand(row),
                         () -> deleteCustomCommand(row)).showDialog());
     }
 
@@ -360,8 +361,19 @@ public class CustomCommandsTabPanel extends JPanel {
     }
 
     private void newCustomCommand() {
-        CustomCommandDefinition saved = new CustomCommandEditorDialog(this, null,
-                CustomCommandRegistry.getInstance().getCustomCommands()).showDialog();
+        addCustomCommand(new CustomCommandEditorDialog(this, null,
+                CustomCommandRegistry.getInstance().getCustomCommands()).showDialog());
+    }
+
+    private void duplicateCustomCommand(CustomCommandRow row) {
+        addCustomCommand(CustomCommandEditorDialog.duplicateOf(this, row.customCommand(),
+                CustomCommandRegistry.getInstance().getCustomCommands()).showDialog());
+    }
+
+    /**
+     * Appends a command the editor returned; {@code null} means the commander backed out of the editor.
+     */
+    private void addCustomCommand(CustomCommandDefinition saved) {
         if (saved == null) {
             return;
         }
@@ -461,7 +473,7 @@ public class CustomCommandsTabPanel extends JPanel {
             }
             String label = CustomCommandStepEditorDialog.stepTypeLabel(step.getType()) + ": ";
             return switch (step.getType()) {
-                case SPEAK -> label + "\"" + step.getText() + "\"";
+                case SPEAK, TYPE_TEXT -> label + "\"" + step.getText() + "\"";
                 case DELAY -> label + step.getDurationMs() + " ms";
                 case BINDING_TAP -> label + step.getBindingId();
                 case BINDING_HOLD -> label + step.getBindingId() + " (" + step.getDurationMs() + " ms)";

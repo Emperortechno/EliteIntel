@@ -35,6 +35,7 @@ public final class CommandDetailsDialog extends JDialog {
     private final boolean showPhraseCorrection;
     private final String sequenceText;
     private final Runnable editAction;
+    private final Runnable duplicateAction;
     private final Runnable deleteAction;
 
     public CommandDetailsDialog(Component parent, CommandCatalogEntry entry) {
@@ -63,7 +64,7 @@ public final class CommandDetailsDialog extends JDialog {
             boolean showPhraseCorrection,
             String sequenceText
     ) {
-        this(parent, entry, phrases, showPhraseCorrection, sequenceText, null, null);
+        this(parent, entry, phrases, showPhraseCorrection, sequenceText, null, null, null);
     }
 
     /**
@@ -76,6 +77,7 @@ public final class CommandDetailsDialog extends JDialog {
             boolean showPhraseCorrection,
             String sequenceText,
             Runnable editAction,
+            Runnable duplicateAction,
             Runnable deleteAction
     ) {
         super(SwingUtilities.getWindowAncestor(parent), dialogTitle(entry), ModalityType.APPLICATION_MODAL);
@@ -84,6 +86,7 @@ public final class CommandDetailsDialog extends JDialog {
         this.showPhraseCorrection = showPhraseCorrection;
         this.sequenceText = sequenceText == null ? "" : sequenceText;
         this.editAction = editAction;
+        this.duplicateAction = duplicateAction;
         this.deleteAction = deleteAction;
         buildUi();
     }
@@ -121,11 +124,16 @@ public final class CommandDetailsDialog extends JDialog {
                 .primary(run)            // right side, outermost
                 .dismiss(close);         // left side
 
-        // edit/delete are optional extras, grouped on the right to the left of primary (run)
+        // edit/duplicate/delete are optional extras, grouped on the right to the left of primary (run)
         if (editAction != null) {
             JButton edit = AppTheme.makeButtonSubtle(getText("actions.customCommands.action.edit"));
             edit.addActionListener(event -> runAfterClose(editAction));
             b.extra(edit);
+        }
+        if (duplicateAction != null) {
+            JButton duplicate = AppTheme.makeButtonSubtle(getText("actions.customCommands.action.duplicate"));
+            duplicate.addActionListener(event -> runAfterClose(duplicateAction));
+            b.extra(duplicate);
         }
         if (deleteAction != null) {
             JButton delete = AppTheme.makeButtonSubtle(getText("actions.customCommands.action.delete"));
